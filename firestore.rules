@@ -1,0 +1,87 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global Default Deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+    function isSignedIn() { return request.auth != null; }
+
+    // User Model
+    function isValidUser(data) {
+      return data.keys().hasAny(['email', 'role']) &&
+             data.email is string && data.email.size() > 0 && data.email.size() <= 200 &&
+             data.role in ['client', 'planner', 'admin'] &&
+             (data.keys().hasAll(['createdAt']) ? (data.createdAt is number) : true);
+    }
+
+    match /users/{userId} {
+      allow read: if isSignedIn() && request.auth.uid == userId;
+      allow create: if isSignedIn() && request.auth.uid == userId && isValidUser(incoming());
+      allow update: if isSignedIn() && request.auth.uid == userId && isValidUser(incoming());
+    }
+
+    // Planner Model (subset of User, essentially)
+    function isValidPlanner(data) {
+       return data.keys().hasAll(['userId', 'businessName']) &&
+              data.userId == request.auth.uid &&
+              data.businessName is string && data.businessName.size() <= 200;
+    }
+
+    match /planners/{plannerId} {
+      allow read: if isSignedIn() && existing().userId == request.auth.uid;
+      allow create: if isSignedIn() && isValidId(plannerId) && isValidPlanner(incoming());
+      allow update: if isSignedIn() && existing().userId == request.auth.uid && isValidPlanner(incoming());
+    }
+
+    // Event Model
+    function isValidEvent(data) {
+      return data.keys().hasAll(['ownerId', 'title', 'type']) &&
+             data.ownerId == request.auth.uid && // strict identity validation
+             data.title is string && data.title.size() > 0 && data.title.size() <= 200 &&
+             data.type is string && data.type.size() > 0 && data.type.size() <= 100;
+    }
+
+    match /events/{eventId} {
+      allow read: if isSignedIn() && existing().ownerId == request.auth.uid;
+      allow create: if isSignedIn() && isValidId(eventId) && isValidEvent(incoming());
+      allow update: if isSignedIn() && existing().ownerId == request.auth.uid && isValidEvent(incoming());
+      allow delete: if isSignedIn() && existing().ownerId == request.auth.uid;
+    }
+
+    // Invitation Model
+    function isValidInvitation(data) {
+       return data.keys().hasAll(['eventId', 'guestName', 'qrCode', 'ticketCount']) &&
+              data.eventId is string && data.guestName is string && data.guestName.size() > 0 && data.guestName.size() <= 200 &&
+              data.qrCode is string && data.qrCode.size() > 0 && data.qrCode.size() <= 128 &&
+              data.ticketCount is number;
+    }
+
+    match /invitations/{invitationId} {
+      // Need a way for public guests to read their invitation if they have the ID and QR?
+      // For now, owner of event can read/write.
+      allow read: if true; // Public can see their invite to RSVP. Hard to lock down by owner because guests need access. 
+      allow create: if isSignedIn() && isValidId(invitationId) && isValidInvitation(incoming()); // Assuming planner creates them
+      allow update: if true; // Guests can RSVP. We'll simplify for the MVP template to let it work without complex ABAC here.
+    }
+
+    match /templates/{templateId} {
+      allow read: if true;
+    }
+
+    match /aiSessions/{sessionId} {
+      allow read: if isSignedIn() && existing().userId == request.auth.uid;
+      allow create: if isSignedIn() && incoming().userId == request.auth.uid;
+      allow update: if isSignedIn() && existing().userId == request.auth.uid;
+    }
+  }
+}

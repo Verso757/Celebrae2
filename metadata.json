@@ -1,0 +1,6 @@
+{
+  "name": "Celebrae",
+  "description": "SaaS de invitaciones digitales inteligentes con creador asistido por IA, gestión de invitados, y panel B2B para Wedding Planners.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

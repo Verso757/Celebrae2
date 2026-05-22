@@ -1,0 +1,113 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "A user of the platform (client, planner, admin)",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "role": { "type": "string", "enum": ["client", "planner", "admin"] },
+        "plan": { "type": "string" },
+        "stripeCustomerId": { "type": "string" },
+        "conektaCustomerId": { "type": "string" },
+        "createdAt": { "type": "number" },
+        "updatedAt": { "type": "number" }
+      },
+      "required": ["email", "role"]
+    },
+    "Planner": {
+      "title": "Planner",
+      "description": "Wedding planner profile and settings",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "businessName": { "type": "string" },
+        "logo": { "type": "string" },
+        "brandColor": { "type": "string" },
+        "activeEventCount": { "type": "number" },
+        "totalEventCount": { "type": "number" },
+        "clientIds": { "type": "array" }
+      },
+      "required": ["userId", "businessName"]
+    },
+    "Event": {
+      "title": "Event",
+      "description": "An event hosted by a user or planner",
+      "type": "object",
+      "properties": {
+        "ownerId": { "type": "string" },
+        "type": { "type": "string" },
+        "title": { "type": "string" },
+        "subtitle": { "type": "string" },
+        "status": { "type": "string", "enum": ["draft", "active", "archived"] },
+        "plan": { "type": "string", "enum": ["basic", "premium", "elite"] },
+        "createdAt": { "type": "number" }
+      },
+      "required": ["ownerId", "title", "type"]
+    },
+    "Invitation": {
+      "title": "Invitation",
+      "description": "A digital invitation ticket for a guest",
+      "type": "object",
+      "properties": {
+        "eventId": { "type": "string" },
+        "guestName": { "type": "string" },
+        "guestLastName": { "type": "string" },
+        "qrCode": { "type": "string" },
+        "ticketCount": { "type": "number" },
+        "rsvpStatus": { "type": "string", "enum": ["pending", "confirmed", "declined"] }
+      },
+      "required": ["eventId", "guestName", "qrCode", "ticketCount"]
+    },
+    "Template": {
+      "title": "Template",
+      "description": "Pre-made invitation designs",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "category": { "type": "string" },
+        "isPremium": { "type": "boolean" },
+        "previewUrl": { "type": "string" }
+      },
+      "required": ["name"]
+    },
+    "AiSession": {
+      "title": "AiSession",
+      "description": "Context for Gemini AI chatbot session",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "eventId": { "type": "string" },
+        "messages": { "type": "array" }
+      },
+      "required": ["userId", "eventId"]
+    }
+  },
+  "firestore": {
+    "users/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "User profiles"
+    },
+    "planners/{plannerId}": {
+      "schema": { "$ref": "#/entities/Planner" },
+      "description": "Planner specific data"
+    },
+    "events/{eventId}": {
+      "schema": { "$ref": "#/entities/Event" },
+      "description": "Events created by users"
+    },
+    "invitations/{invitationId}": {
+      "schema": { "$ref": "#/entities/Invitation" },
+      "description": "Guest invitations"
+    },
+    "templates/{templateId}": {
+      "schema": { "$ref": "#/entities/Template" },
+      "description": "App templates"
+    },
+    "aiSessions/{sessionId}": {
+      "schema": { "$ref": "#/entities/AiSession" },
+      "description": "AI chatbot sessions"
+    }
+  }
+}
