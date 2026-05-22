@@ -26,7 +26,7 @@ export default function Login() {
       await loginWithGoogle();
     } catch (e: any) {
       console.error(e);
-      setError("Error al iniciar con Google.");
+      setError("Error al iniciar con Google. Si estás en la vista previa, intenta abrir la aplicación en una nueva pestaña (botón superior derecho), o registrate con correo y contraseña.");
       setLoading(false);
     }
   };

@@ -1,10 +1,9 @@
 {
-  "projectId": "inspired-forklift-8sjh2",
-  "appId": "1:742961653234:web:681cc303c2bd8cf1ed376b",
-  "apiKey": "AIzaSyBu6M5jR50kWPNaK7kjcAMNlBl5DUV4e1g",
-  "authDomain": "inspired-forklift-8sjh2.firebaseapp.com",
-  "firestoreDatabaseId": "ai-studio-baf8f774-208d-4813-b734-9029d32213ea",
-  "storageBucket": "inspired-forklift-8sjh2.firebasestorage.app",
-  "messagingSenderId": "742961653234",
-  "measurementId": ""
+  "projectId": "celebrae-21fd8",
+  "appId": "1:683647744563:web:48d1aa6d0048ae939e4146",
+  "apiKey": "AIzaSyCA2RWRpG-4TMMSdXcRCGixkQt05rC9egg",
+  "authDomain": "celebrae-21fd8.firebaseapp.com",
+  "storageBucket": "celebrae-21fd8.firebasestorage.app",
+  "messagingSenderId": "683647744563",
+  "measurementId": "G-NM5E8YSX77"
 }

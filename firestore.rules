@@ -7,7 +7,7 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
-    // Helper functions
+    // Funciones
     function isValidId(id) {
       return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
     }
@@ -16,7 +16,7 @@ service cloud.firestore {
     function existing() { return resource.data; }
     function isSignedIn() { return request.auth != null; }
 
-    // User Model
+    // Users
     function isValidUser(data) {
       return data.keys().hasAny(['email', 'role']) &&
              data.email is string && data.email.size() > 0 && data.email.size() <= 200 &&
@@ -30,7 +30,7 @@ service cloud.firestore {
       allow update: if isSignedIn() && request.auth.uid == userId && isValidUser(incoming());
     }
 
-    // Planner Model (subset of User, essentially)
+    // Planners
     function isValidPlanner(data) {
        return data.keys().hasAll(['userId', 'businessName']) &&
               data.userId == request.auth.uid &&
@@ -43,10 +43,10 @@ service cloud.firestore {
       allow update: if isSignedIn() && existing().userId == request.auth.uid && isValidPlanner(incoming());
     }
 
-    // Event Model
+    // Events
     function isValidEvent(data) {
       return data.keys().hasAll(['ownerId', 'title', 'type']) &&
-             data.ownerId == request.auth.uid && // strict identity validation
+             data.ownerId == request.auth.uid &&
              data.title is string && data.title.size() > 0 && data.title.size() <= 200 &&
              data.type is string && data.type.size() > 0 && data.type.size() <= 100;
     }
@@ -58,7 +58,7 @@ service cloud.firestore {
       allow delete: if isSignedIn() && existing().ownerId == request.auth.uid;
     }
 
-    // Invitation Model
+    // Invitations
     function isValidInvitation(data) {
        return data.keys().hasAll(['eventId', 'guestName', 'qrCode', 'ticketCount']) &&
               data.eventId is string && data.guestName is string && data.guestName.size() > 0 && data.guestName.size() <= 200 &&
@@ -67,11 +67,9 @@ service cloud.firestore {
     }
 
     match /invitations/{invitationId} {
-      // Need a way for public guests to read their invitation if they have the ID and QR?
-      // For now, owner of event can read/write.
-      allow read: if true; // Public can see their invite to RSVP. Hard to lock down by owner because guests need access. 
-      allow create: if isSignedIn() && isValidId(invitationId) && isValidInvitation(incoming()); // Assuming planner creates them
-      allow update: if true; // Guests can RSVP. We'll simplify for the MVP template to let it work without complex ABAC here.
+      allow read: if true; 
+      allow create: if isSignedIn() && isValidId(invitationId) && isValidInvitation(incoming());
+      allow update: if true; 
     }
 
     match /templates/{templateId} {
